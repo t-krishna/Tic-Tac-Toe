@@ -3,34 +3,36 @@ import os
 #TicTacToe: minimax
 
 #Began: 10/14/2016
-#Completed: Work in progress
-#Goal: AI that uses the minimax algorithm to become the perfect player
+#Completed: 10/24/2016
+#AI that uses the minimax algorithm to calculate all possible moves and choose the best one
+#this AI will never lose. It will either draw with the player or win
 
 #defining global variables
-labelsForBoard = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-gameOver = False
-winState = ""
+labelsForBoard = [1, 2, 3, 4, 5, 6, 7, 8, 9] #the game board
+choice = 0
 
 #draw board function
-def draw_board():
+def draw_board(label:list)-> None:
+	'prints out the board'
 	print()
 	z = 0
 	for i in range(3):
 		for j in range(3):
-			print(labelsForBoard[z], end=" ")
+			print(label[z], end=" ")
 			z = z + 1
 		print()
 
 
 
-#checking win conditions function (score system)
-def win(label):
+#checking win conditions function (score system) and if game is over
+def win(label:list)-> tuple:
+	'Checks win conditions and returns a tuple of if the game is over and the score'
 	counter = 0
 	for i in range(9):
 		if((label[i] == player) or (label[i] == cpu)):
 			counter = counter + 1
 			if (counter == 9):
-				x = (True, 0)
+				x = (True, 0) #True = Game is over, 0 = score
 				return(x)
 
 	if ((label[0] == label[1] == label[2] == player) or
@@ -53,19 +55,17 @@ def win(label):
 		(label[0] == label[4] == label[8] == cpu) or
 		(label[2] == label[4] == label[6] == cpu)):
 		x = (True, 10)
-		return(10)
+		return(x)
 
 	else:
-		return(False, 0)
-
-#checking draw conditions function
-
-
+		x = (False, 0)
+		return(x)
 
 
 
 #check if the player inputed an int for their move
-def is_int(s):
+def is_int(s:int)-> bool:
+	'Checks if the player input is an int and returns a bool for the player_turn function'
 	try:
 		int(s)
 		return True
@@ -73,7 +73,8 @@ def is_int(s):
 		return False
 
 #player turn function
-def player_turn(label):
+def player_turn(label:list)-> list:
+	'Places a player marker on their selected tile if it is available'
 	while(True):
 		selectedTile = input("Your move: ")
 		if (is_int(selectedTile) == True):
@@ -81,7 +82,7 @@ def player_turn(label):
 			if ((selectedTile > 0) and (selectedTile < 10) and 
 				(label[selectedTile - 1] != player) and (label[selectedTile - 1] != cpu)):
 				label[selectedTile - 1] = player
-				break
+				return label
 			else:
 				print("invalid input")
 		else:
@@ -89,8 +90,49 @@ def player_turn(label):
 
 
 
-def cpu_turn(label):
-	print("[insert AI here]")
+#switches between player and cpu
+def switch(currentPlayer: str)-> str:
+	'switches between player and cpu markers for the minimax function'
+	if currentPlayer == cpu:
+		return player
+	else:
+		return cpu
+
+#obtains the index for the best move
+def minimax(label:list, currentPlayer:str)-> int:
+	'Calculates the scores for every calculated move. Stores the move in choice variable'
+	global choice
+	if win(label)[0] == True:
+		return win(label)[1]
+	scores = []
+	moves = []
+
+	for i in range(len(label)):
+		if ((label[i] != cpu) and (label[i] != player)):
+			possibleGame = list(label)
+			possibleGame[i] = currentPlayer
+			x = minimax(possibleGame, switch(currentPlayer))
+			if (x == None):
+				x = 0
+			scores.append(x)
+			moves.append(i)
+
+	if (currentPlayer == cpu):
+		maxScoreIndex = scores.index(max(scores))
+		choice = moves[maxScoreIndex]
+		return scores[maxScoreIndex]
+	else:
+		minScoreIndex = scores.index(min(scores))
+		choice = moves[minScoreIndex]
+		return scores[minScoreIndex]
+
+#impliments the choice move obtained during the minimax funtion onto the board
+def cpu_turn(label:list, currentPlayer:str)-> list:
+	'Returns the list with the choice move obtained during the minimax function'
+	minimax(label, currentPlayer)
+	label[choice] = currentPlayer
+	return label
+
 
 
 #the main program
@@ -110,19 +152,33 @@ while(True):
 	else:
 		print("Invalid input, please try again.")
 
-#the game loop
-while(win(labelsForBoard)[0] == False):
-	draw_board()
+#if the player chose X then they go first
+if (player == 'X'):
+	draw_board(labelsForBoard)
 	player_turn(labelsForBoard)
+	cpu_turn(labelsForBoard, cpu)
+	draw_board(labelsForBoard)
+else:
+	cpu_turn(labelsForBoard, cpu)
+	draw_board(labelsForBoard)
+
+#the game loop after specifying the first move
+while(win(labelsForBoard)[0] == False):
+	player_turn(labelsForBoard)
+
 	if (win(labelsForBoard)[0] == False):
-		cpu_turn(labelsForBoard)
-	if (win(labelsForBoard)[0] == True):
-		if (win(labelsForBoard)[1] == 0):
+		cpu_turn(labelsForBoard, cpu)
+
+	#checking the win conditions. If game not over just draw board
+	if (win(labelsForBoard)[0] == True): #checking if the game is over
+		if (win(labelsForBoard)[1] == 0): 
 			print("\nDRAW")
-			draw_board()
+			draw_board(labelsForBoard)
 		elif (win(labelsForBoard)[1] == 10):
 			print("\nYOU LOSE")
-			draw_board()
+			draw_board(labelsForBoard)
 		else:
-			print("\nYOU WIN")
-			draw_board()
+			print("\nYOU WON? IMPOSSIBLE!!!")
+			draw_board(labelsForBoard)
+	else:
+		draw_board(labelsForBoard)
