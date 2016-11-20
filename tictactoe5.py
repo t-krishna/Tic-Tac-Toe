@@ -27,13 +27,7 @@ def draw_board(label:list)-> None:
 #checking win conditions function (score system) and if game is over
 def win(label:list)-> tuple:
 	'Checks win conditions and returns a tuple of if the game is over and the score'
-	counter = 0
-	for i in range(9):
-		if((label[i] == player) or (label[i] == cpu)):
-			counter = counter + 1
-			if (counter == 9):
-				x = (True, 0) #True = Game is over, 0 = score
-				return(x)
+	
 
 	if ((label[0] == label[1] == label[2] == player) or
 		(label[3] == label[4] == label[5] == player) or
@@ -43,7 +37,7 @@ def win(label:list)-> tuple:
 		(label[2] == label[5] == label[8] == player) or
 		(label[0] == label[4] == label[8] == player) or
 		(label[2] == label[4] == label[6] == player)):
-		x = (True, -10)
+		x = (True, -10) #True = Game is over, -10 = score
 		return(x)
 
 	elif ((label[0] == label[1] == label[2] == cpu) or
@@ -54,11 +48,18 @@ def win(label:list)-> tuple:
 		(label[2] == label[5] == label[8] == cpu) or
 		(label[0] == label[4] == label[8] == cpu) or
 		(label[2] == label[4] == label[6] == cpu)):
-		x = (True, 10)
+		x = (True, 10) #True = Game is over, 10 = score
 		return(x)
 
 	else:
-		x = (False, 0)
+		counter = 0
+		for i in range(9):
+			if((label[i] == player) or (label[i] == cpu)):
+				counter = counter + 1
+				if (counter == 9):
+					x = (True, 0) #True = Game is over, 0 = score
+					return(x)
+		x = (False, 0) #False = Game is not over, 0 = score
 		return(x)
 
 
